@@ -14,12 +14,73 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-import webapp2
 
-class MainHandler(webapp2.RequestHandler):
+from caesar import encrypt
+import webapp2
+import cgi
+
+
+form="""
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <style>
+            html {
+                background-color: #00ee00;
+            }
+            form {
+                background-color: #90ee90;
+                padding: 50px;
+                width: 640px;
+                font: 16px sans-serif;
+                margin: auto;
+            }
+            textarea {
+                background-color: #eeeeee;
+                margin: 10px 0;
+                width: 640px;
+                height: 120px;
+                color: #009900;
+            }
+            p.error {
+                color: red;
+            }
+        </style>
+    </head>
+    <body>
+        <form method="post">
+            <div>
+                <label for="rot">Rotate by:</label>
+                <input type="text" name="rot" value="13">
+                <p class="error"></p>
+            </div>
+            <textarea type="text" name="text">%(error)s</textarea>
+            <br>
+            <input type="submit">
+        </form>
+    </body>
+</html>
+
+"""
+
+
+class Caesar(webapp2.RequestHandler):
+
+
     def get(self):
-        self.response.write('Hello world!')
+        self.response.write(form % {"error": ""})
+
+
+    def post(self):
+        rot = self.request.get("rot")
+        text = self.request.get("text")
+        rot = int(rot)
+        answer = encrypt(text, rot)
+        answer_escaped = cgi.escape(answer)
+        self.response.out.write(form % {"error": answer_escaped })
+
 
 app = webapp2.WSGIApplication([
-    ('/', MainHandler)
+    ('/', Caesar)
 ], debug=True)
